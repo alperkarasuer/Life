@@ -1,5 +1,7 @@
 import pygame
 import numpy as np
+from cell import Cell
+from board import Board
 
 class Game:
     # Initialize a N by N board
@@ -7,6 +9,7 @@ class Game:
         # Empty grid array
         self.grid = np.zeros((gridSize, gridSize), dtype = bool)
         self.gridSize = gridSize
+        self.grid = [[Cell() for column_cells in range(self.gridSize)] for row_cells in range(self.gridSize)]
 
     # Checks whether a give cell is on edge or corner
     def checkEdges(self, cellPos):
@@ -32,40 +35,15 @@ class Game:
 
         print(cornersAndEdges)
 
-    # A class for each of the cells with alive or dead attribute?
-
-class Board:
-    def __init__(self, n):
-        # Color definitions
-        self.black = (0, 0, 0)
-        self.white = (255, 255, 255)
-        self.green = (0, 255, 0)
-
-        # N by N grid
-        self.n = n
-        self.borderCount = n+1
-
-        # Height and width of each cell
-        self.width = 20
-        self.height = 20
-
-        # Margins between cells
-        self.margin = 5
-
-        # Set the height and width of the screen
-        self.window_size = [self.n * self.width + self.borderCount * self.margin, self.n * self.width + self.borderCount * self.margin]
-        self.screen = pygame.display.set_mode(self.window_size)
 
 
 gameBoard = Board(20)
-
 game = Game(gameBoard.n)
-game.checkEdges((0,0))
 
 # Initial Conditions
-game.grid[8][10] = 1
-game.grid[9][10] = 1
-game.grid[10][10] = 1
+game.grid[8][10].set_alive()
+game.grid[9][10].set_alive()
+game.grid[10][10].set_alive()
 
 
 
@@ -74,6 +52,7 @@ pygame.init()
 
 # Set title of screen
 pygame.display.set_caption("Game of Life")
+screen = pygame.display.set_mode(gameBoard.window_size)
 
 # Loop until the user clicks the close button.
 running = True
@@ -88,15 +67,15 @@ while running:
             running = False  # Flag that we are done so we exit this loop
 
     # Set the screen background
-    gameBoard.screen.fill(gameBoard.black)
+    screen.fill(gameBoard.black)
 
     # Draw the grid
     for row in range(gameBoard.n):
         for column in range(gameBoard.n):
             color = gameBoard.white
-            if game.grid[row][column] == 1:
+            if game.grid[row][column].is_alive():
                 color = gameBoard.green
-            pygame.draw.rect(gameBoard.screen,
+            pygame.draw.rect(screen,
                              color,
                              [(gameBoard.margin + gameBoard.width) * column + gameBoard.margin,
                               (gameBoard.margin + gameBoard.height) * row + gameBoard.margin,
