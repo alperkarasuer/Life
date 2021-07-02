@@ -10,6 +10,7 @@ class Game:
         self.grid = np.zeros((gridSize, gridSize), dtype = bool)
         self.gridSize = gridSize
         self.grid = [[Cell() for column_cells in range(self.gridSize)] for row_cells in range(self.gridSize)]
+        Cell.randomGenerate()
 
     # Checks whether a give cell is on edge or corner
     def checkEdges(self, cellPos):
@@ -39,13 +40,6 @@ class Game:
 
 gameBoard = Board(20)
 game = Game(gameBoard.n)
-
-# Initial Conditions
-game.grid[8][10].set_alive()
-game.grid[9][10].set_alive()
-game.grid[10][10].set_alive()
-
-
 
 # Initialize pygame
 pygame.init()
