@@ -2,12 +2,13 @@ import random
 
 class Cell(object):
     cellObjs = []  # registrar
-    def __init__(self):
+    def __init__(self, rowPos, colPos):
         '''
         Cell has ability to be alive or dead, status can be
         checked with functions. Initial status is dead.
         '''
         Cell.cellObjs.append(self)
+        self.cellPos = (rowPos, colPos)
         self._status = 'Dead'
 
     @classmethod
