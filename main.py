@@ -3,6 +3,21 @@ import numpy as np
 from cell import Cell
 from board import Board
 
+def drawTheGrid():
+    # Draws a green coloured rectangle if the cell on given position of
+    # grid array is alive
+    for row in range(gameBoard.n):
+        for column in range(gameBoard.n):
+            color = gameBoard.white
+            if game.grid[row][column].is_alive():
+                color = gameBoard.green
+            pygame.draw.rect(screen,
+                             color,
+                             [(gameBoard.margin + gameBoard.width) * column + gameBoard.margin,
+                              (gameBoard.margin + gameBoard.height) * row + gameBoard.margin,
+                              gameBoard.width,
+                              gameBoard.height])
+
 class Game:
     # Initialize a N by N board
     def __init__(self,gridSize):
@@ -10,7 +25,6 @@ class Game:
         self.grid = np.zeros((gridSize, gridSize), dtype = bool)
         self.gridSize = gridSize
         self.grid = [[Cell(row_cells, column_cells) for column_cells in range(self.gridSize)] for row_cells in range(self.gridSize)]
-        Cell.randomGenerate()
         self._rows = gridSize
         self._columns = gridSize
 
@@ -81,7 +95,7 @@ class Game:
         for cell_items in gets_killed:
             cell_items.set_dead()
 
-gameBoard = Board(20)
+gameBoard = Board(30)
 game = Game(gameBoard.n)
 
 # Initialize pygame
@@ -97,33 +111,68 @@ running = True
 # Used to manage how fast the screen updates
 clock = pygame.time.Clock()
 
+firstRun = True
+randomGenerated = False
+stepMode = False
 # -------- Main Program Loop -----------
 while running:
-    for event in pygame.event.get():  # User did something
-        if event.type == pygame.QUIT:  # If user clicked close
-            running = False  # Flag that we are done so we exit this loop
 
     # Set the screen background
     screen.fill(gameBoard.black)
 
     # Draw the grid
-    for row in range(gameBoard.n):
-        for column in range(gameBoard.n):
-            color = gameBoard.white
-            if game.grid[row][column].is_alive():
-                color = gameBoard.green
-            pygame.draw.rect(screen,
-                             color,
-                             [(gameBoard.margin + gameBoard.width) * column + gameBoard.margin,
-                              (gameBoard.margin + gameBoard.height) * row + gameBoard.margin,
-                              gameBoard.width,
-                              gameBoard.height])
+    drawTheGrid()
+
     game.update_board()
-    # Limit to 60 frames per second
-    clock.tick(60)
+
+    # Limit frames per second
+    clock.tick(5)
 
     # Go ahead and update the screen with what we've drawn.
     pygame.display.flip()
+
+    # Loop for the initial setup
+    if firstRun == True:
+        while True:
+            initEvent = pygame.event.wait()
+            if initEvent.type == pygame.QUIT:
+                running = False
+                break
+            if initEvent.type == pygame.KEYDOWN:
+                if initEvent.key == pygame.K_RETURN:
+                    firstRun = False
+                    break
+                if initEvent.key == pygame.K_r and randomGenerated == False:
+                    randomGenerated = True
+                    Cell.randomGenerate()
+                    drawTheGrid()
+                    pygame.display.flip()
+
+    # Loop for the step mode
+    while stepMode == True:
+        stepEvent = pygame.event.wait()
+        if stepEvent.type == pygame.QUIT:
+            running = False
+            break
+        if stepEvent.type == pygame.KEYDOWN and stepEvent.key == pygame.K_s:
+            game.update_board()
+            drawTheGrid()
+            pygame.display.flip()
+        if stepEvent.type == pygame.KEYDOWN and stepEvent.key == pygame.K_RETURN:
+            stepMode = False
+
+    # Main loop
+    for event in pygame.event.get():  # User did something
+        if event.type == pygame.QUIT:  # If user clicked close
+            running = False  # Flag that we are done so we exit this loop
+        if event.type == pygame.KEYDOWN and firstRun == False:
+            if event.key == pygame.K_s:
+                stepMode = True
+                pygame.event.wait()
+
+
+
+
 
 # Be IDLE friendly. If you forget this line, the program will 'hang'
 # on exit.
