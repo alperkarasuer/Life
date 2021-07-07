@@ -2,6 +2,8 @@ import pygame
 import numpy as np
 from cell import Cell
 from board import Board
+#from tkinter import *
+#from tkinter import messagebox
 
 def drawTheGrid():
     # Draws a green coloured rectangle if the cell on given position of
@@ -88,14 +90,19 @@ class Game:
                     if len(living_neighbours_count) == 3:
                         goes_alive.append(cell_object)
 
-        # sett cell statuses
+        # set cell statuses
         for cell_items in goes_alive:
             cell_items.set_alive()
 
         for cell_items in gets_killed:
             cell_items.set_dead()
 
-gameBoard = Board(30)
+    def clickWhere(self, clickPos):
+        pass
+
+
+# Start a game of size N
+gameBoard = Board(2)
 game = Game(gameBoard.n)
 
 # Initialize pygame
@@ -111,14 +118,36 @@ running = True
 # Used to manage how fast the screen updates
 clock = pygame.time.Clock()
 
-firstRun = True
 randomGenerated = False
 stepMode = False
+
+# Set the screen background
+screen.fill(gameBoard.black)
+drawTheGrid()
+pygame.display.flip()
+
+# Tk().wm_withdraw()
+# infoText = "Press R to initialize cells randomly\nPress ENTER to start the simulation\nPress S to enter into step mode."
+# messagebox.showinfo("Instructions",infoText)
+while True:
+    initEvent = pygame.event.wait()
+    if initEvent.type == pygame.QUIT:
+        running = False
+        break
+    if initEvent.type == pygame.KEYDOWN:
+        if initEvent.key == pygame.K_RETURN:
+            break
+        if initEvent.key == pygame.K_r and randomGenerated == False:
+            randomGenerated = True
+            Cell.randomGenerate()
+            drawTheGrid()
+            pygame.display.flip()
+    if initEvent.type == pygame.MOUSEBUTTONDOWN:
+        print(pygame.mouse.get_pos())
+
+
 # -------- Main Program Loop -----------
 while running:
-
-    # Set the screen background
-    screen.fill(gameBoard.black)
 
     # Draw the grid
     drawTheGrid()
@@ -126,49 +155,28 @@ while running:
     game.update_board()
 
     # Limit frames per second
-    clock.tick(5)
+    clock.tick(30)
 
     # Go ahead and update the screen with what we've drawn.
     pygame.display.flip()
-
-    # Loop for the initial setup
-    if firstRun == True:
-        while True:
-            initEvent = pygame.event.wait()
-            if initEvent.type == pygame.QUIT:
-                running = False
-                break
-            if initEvent.type == pygame.KEYDOWN:
-                if initEvent.key == pygame.K_RETURN:
-                    firstRun = False
-                    break
-                if initEvent.key == pygame.K_r and randomGenerated == False:
-                    randomGenerated = True
-                    Cell.randomGenerate()
-                    drawTheGrid()
-                    pygame.display.flip()
-
-    # Loop for the step mode
-    while stepMode == True:
-        stepEvent = pygame.event.wait()
-        if stepEvent.type == pygame.QUIT:
-            running = False
-            break
-        if stepEvent.type == pygame.KEYDOWN and stepEvent.key == pygame.K_s:
-            game.update_board()
-            drawTheGrid()
-            pygame.display.flip()
-        if stepEvent.type == pygame.KEYDOWN and stepEvent.key == pygame.K_RETURN:
-            stepMode = False
 
     # Main loop
     for event in pygame.event.get():  # User did something
         if event.type == pygame.QUIT:  # If user clicked close
             running = False  # Flag that we are done so we exit this loop
-        if event.type == pygame.KEYDOWN and firstRun == False:
-            if event.key == pygame.K_s:
-                stepMode = True
-                pygame.event.wait()
+        if event.type == pygame.KEYDOWN and event.key == pygame.K_s:
+            stepMode = True
+            while stepMode == True:
+                stepEvent = pygame.event.wait()
+                if stepEvent.type == pygame.QUIT:
+                    running = False
+                    break
+                if stepEvent.type == pygame.KEYDOWN and stepEvent.key == pygame.K_s:
+                    game.update_board()
+                    drawTheGrid()
+                    pygame.display.flip()
+                if stepEvent.type == pygame.KEYDOWN and stepEvent.key == pygame.K_RETURN:
+                    stepMode = False
 
 
 
