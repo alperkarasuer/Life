@@ -2,8 +2,6 @@ import pygame
 import numpy as np
 from cell import Cell
 from board import Board
-#from tkinter import *
-#from tkinter import messagebox
 
 def drawTheGrid():
     # Draws a green coloured rectangle if the cell on given position of
@@ -98,12 +96,25 @@ class Game:
             cell_items.set_dead()
 
     def clickWhere(self, clickPos):
-        pass
+        # Find the cell that contains the clicked position, returns none if clicked position is within borders
+        for i in range(self.gridSize):
+            for j in range(self.gridSize):
+                xHi = game.grid[i][j].screenPos[0][1]
+                xLo = game.grid[i][j].screenPos[0][0]
+                yLo = game.grid[i][j].screenPos[1][0]
+                yHi = game.grid[i][j].screenPos[1][1]
+
+                if (clickPos[0] in range(xLo,xHi)) and (clickPos[1] in range(yLo,yHi)):
+                    clickedCell = game.grid[i][j].cellPos
+                    return clickedCell
+
+        return None
+
 
 
 # Start a game of size N
-gameBoard = Board(2)
-game = Game(gameBoard.n)
+gameBoard = Board(30)
+game = Game(gameBoard.n,gameBoard.width,gameBoard.height,gameBoard.margin)
 
 # Initialize pygame
 pygame.init()
@@ -126,14 +137,15 @@ screen.fill(gameBoard.black)
 drawTheGrid()
 pygame.display.flip()
 
-# Tk().wm_withdraw()
-# infoText = "Press R to initialize cells randomly\nPress ENTER to start the simulation\nPress S to enter into step mode."
-# messagebox.showinfo("Instructions",infoText)
+
 while True:
     initEvent = pygame.event.wait()
+
     if initEvent.type == pygame.QUIT:
         running = False
         break
+
+    # Press R to randomly generate cell status
     if initEvent.type == pygame.KEYDOWN:
         if initEvent.key == pygame.K_RETURN:
             break
@@ -142,8 +154,19 @@ while True:
             Cell.randomGenerate()
             drawTheGrid()
             pygame.display.flip()
+
+    # Click on cells to change their status
     if initEvent.type == pygame.MOUSEBUTTONDOWN:
-        print(pygame.mouse.get_pos())
+        clickPosition = pygame.mouse.get_pos()
+        whichCell = game.clickWhere(clickPosition)
+        if isinstance(whichCell, tuple):
+            if game.grid[whichCell[0]][whichCell[1]].is_alive():
+                game.grid[whichCell[0]][whichCell[1]].set_dead()
+            else:
+                game.grid[whichCell[0]][whichCell[1]].set_alive()
+            drawTheGrid()
+            pygame.display.flip()
+
 
 
 # -------- Main Program Loop -----------
@@ -182,7 +205,6 @@ while running:
 
 
 
-# Be IDLE friendly. If you forget this line, the program will 'hang'
-# on exit.
+# Quit the program
 pygame.quit()
 
