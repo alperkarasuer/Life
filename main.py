@@ -1,30 +1,44 @@
 import pygame
 import numpy as np
 from cell import Cell
-from board import Board
+
+gameSize = 30
+clockSpeed = 10
+colourBlack = (0, 0, 0)
+colourWhite = (255, 255, 255)
+colourGreen = (0, 255, 0)
+
+borderCount = gameSize+1
+cellWidth = 20
+cellHeight = 20
+
+cellMargin = 5
+windowSize = [gameSize * cellWidth + borderCount * cellMargin, gameSize * cellWidth + borderCount * cellMargin]
 
 def drawTheGrid():
     # Draws a green coloured rectangle if the cell on given position of
     # grid array is alive
-    for row in range(gameBoard.n):
-        for column in range(gameBoard.n):
-            color = gameBoard.white
+    for row in range(gameSize):
+        for column in range(gameSize):
+            color = colourWhite
             if game.grid[row][column].is_alive():
-                color = gameBoard.green
+                color = colourGreen
             pygame.draw.rect(screen,
                              color,
-                             [(gameBoard.margin + gameBoard.width) * column + gameBoard.margin,
-                              (gameBoard.margin + gameBoard.height) * row + gameBoard.margin,
-                              gameBoard.width,
-                              gameBoard.height])
+                             [(cellMargin + cellWidth) * column + cellMargin,
+                              (cellMargin + cellHeight) * row + cellMargin,
+                              cellWidth,
+                              cellHeight])
 
 class Game:
     # Initialize a N by N board
     def __init__(self,gridSize):
         # Empty grid array
-        self.grid = np.zeros((gridSize, gridSize), dtype = bool)
         self.gridSize = gridSize
-        self.grid = [[Cell(row_cells, column_cells) for column_cells in range(self.gridSize)] for row_cells in range(self.gridSize)]
+        self.grid = np.zeros((gridSize, gridSize), dtype = bool)
+        self.gameInfo = (cellWidth,cellHeight,cellMargin)
+        cellNumber = (1,2)
+        self.grid = [[Cell(row_cells, column_cells, self.gameInfo) for column_cells in range(self.gridSize)] for row_cells in range(self.gridSize)]
         self._rows = gridSize
         self._columns = gridSize
 
@@ -88,7 +102,7 @@ class Game:
                     if len(living_neighbours_count) == 3:
                         goes_alive.append(cell_object)
 
-        # set cell statuses
+        # set cell status
         for cell_items in goes_alive:
             cell_items.set_alive()
 
@@ -96,7 +110,7 @@ class Game:
             cell_items.set_dead()
 
     def clickWhere(self, clickPos):
-        # Find the cell that contains the clicked position, returns none if clicked position is within borders
+        # Find the cell that contains the clicked position
         for i in range(self.gridSize):
             for j in range(self.gridSize):
                 xHi = game.grid[i][j].screenPos[0][1]
@@ -105,23 +119,21 @@ class Game:
                 yHi = game.grid[i][j].screenPos[1][1]
 
                 if (clickPos[0] in range(xLo,xHi)) and (clickPos[1] in range(yLo,yHi)):
-                    clickedCell = game.grid[i][j].cellPos
+                    clickedCell = (i,j)
                     return clickedCell
-
         return None
 
 
 
 # Start a game of size N
-gameBoard = Board(30)
-game = Game(gameBoard.n,gameBoard.width,gameBoard.height,gameBoard.margin)
+game = Game(gameSize)
 
 # Initialize pygame
 pygame.init()
 
 # Set title of screen
 pygame.display.set_caption("Game of Life")
-screen = pygame.display.set_mode(gameBoard.window_size)
+screen = pygame.display.set_mode(windowSize)
 
 # Loop until the user clicks the close button.
 running = True
@@ -129,15 +141,16 @@ running = True
 # Used to manage how fast the screen updates
 clock = pygame.time.Clock()
 
+# Set Flags
 randomGenerated = False
 stepMode = False
 
 # Set the screen background
-screen.fill(gameBoard.black)
+screen.fill(colourBlack)
 drawTheGrid()
 pygame.display.flip()
 
-
+# Initial setup of the game, random cells or draw using mouse or both.
 while True:
     initEvent = pygame.event.wait()
 
@@ -159,6 +172,8 @@ while True:
     if initEvent.type == pygame.MOUSEBUTTONDOWN:
         clickPosition = pygame.mouse.get_pos()
         whichCell = game.clickWhere(clickPosition)
+
+        # When clicked on borders, it returns none so make sure that it is a tuple
         if isinstance(whichCell, tuple):
             if game.grid[whichCell[0]][whichCell[1]].is_alive():
                 game.grid[whichCell[0]][whichCell[1]].set_dead()
@@ -178,7 +193,7 @@ while running:
     game.update_board()
 
     # Limit frames per second
-    clock.tick(30)
+    clock.tick(clockSpeed)
 
     # Go ahead and update the screen with what we've drawn.
     pygame.display.flip()

@@ -2,15 +2,22 @@ import random
 
 class Cell(object):
     cellObjs = []  # registrar
-    def __init__(self, rowPos, colPos, cellInfo):
+    def __init__(self, cellPos, gameInfo):
         '''
-        Cell has ability to be alive or dead, status can be
+        Cell has the ability to be alive or dead, status can be
         checked with functions. Initial status is dead.
         '''
         Cell.cellObjs.append(self)
-        self.cellPos = (rowPos, colPos)
+        self.width = gameInfo[0]
+        self.height = gameInfo[1]
+        self.margin = gameInfo[2]
+        self.rowPos = cellPos[0]
+        self.colPos = cellPos[1]
         self._status = 'Dead'
-        self.screenPos = [[(colPos+1)*5 + colPos*20, (colPos+1)*5 + (colPos+1)*20],[(rowPos+1)*5 + rowPos*20, (rowPos+1)*5 + (rowPos+1)*20]]
+        self.screenPos = [[(self.colPos+1)*self.margin + self.colPos*self.width,
+                           (self.colPos+1)*self.margin + (self.colPos+1)*self.width],
+                          [(self.rowPos+1)*self.margin + self.rowPos*self.height,
+                           (self.rowPos+1)*self.margin + (self.rowPos+1)*self.height]]
 
     @classmethod
     def randomGenerate(cls):
@@ -26,6 +33,3 @@ class Cell(object):
 
     def is_alive(self):
         return True if self._status == 'Alive' else False
-
-    def get_print_character(self):
-        return '0' if self.is_alive() else '*'
