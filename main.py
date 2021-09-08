@@ -38,7 +38,7 @@ class Game:
         self.grid = np.zeros((gridSize, gridSize), dtype = bool)
         self.gameInfo = (cellWidth,cellHeight,cellMargin)
         cellNumber = (1,2)
-        self.grid = [[Cell(row_cells, column_cells, self.gameInfo) for column_cells in range(self.gridSize)] for row_cells in range(self.gridSize)]
+        self.grid = [[Cell([row_cells, column_cells], self.gameInfo) for column_cells in range(self.gridSize)] for row_cells in range(self.gridSize)]
         self._rows = gridSize
         self._columns = gridSize
 
